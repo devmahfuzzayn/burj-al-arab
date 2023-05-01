@@ -7,7 +7,8 @@ import "./Register.css";
 const Register = () => {
     const [success, setSuccess] = useState("");
     const [error, setError] = useState("");
-    const { registerUser } = useContext(AuthContext);
+    const { registerUser, sendEmailVerificationToUser } =
+        useContext(AuthContext);
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -48,10 +49,22 @@ const Register = () => {
 
         registerUser(email, password)
             .then((result) => {
+                const user = result.user;
+                console.log(user);
                 setSuccess("Registration done successfully.");
                 console.log(result);
                 form.reset();
-                navigate(from, { replace: true });
+                sendEmailVerificationToUser(user)
+                    .then((result) => {
+                        setSuccess("Verification link has been sent to email.");
+                        setTimeout(() => {
+                            navigate(from, { replace: true });
+                        }, 1000);
+                    })
+                    .catch((error) => {
+                        const message = error.message;
+                        console.log(message);
+                    });
             })
             .catch((error) => {
                 const message = error.message;
